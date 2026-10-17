@@ -1,4 +1,4 @@
-# --- STAGE 1: Builder ---
+# --- STAGE 1: Builder (Isolamento Totale) ---
 FROM python:3.12-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -6,47 +6,47 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /build
 
+# Installazione build-essentials per compilare eventuali estensioni C
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 1. Installiamo prima le dipendenze esterne
+# 1. Creazione del Virtual Environment
+# Questo risolve il problema del "root user" perché pip lavorerà dentro una sandbox
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# 2. Installazione dipendenze esterne
 COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --upgrade pip
-# 2. Copiamo il codice sorgente per poter installare il pacchetto locale
+# 3. Installazione del pacchetto locale con supporto MCP
+# Copiamo il codice prima per permettere l'installazione del progetto stesso
 COPY . .
-
-# 3. INSTALLAZIONE CRITICA: Installiamo il progetto stesso con il supporto MCP
-# Assicurati che nel tuo progetto ci sia un pyproject.toml o setup.py
-RUN pip install --no-cache-dir --prefix=/install .[mcp]
+RUN pip install --no-cache-dir .[mcp]
 
 
-# --- STAGE 2: Final Runtime ---
+# --- STAGE 2: Final Runtime (Minimalismo e Sicurezza) ---
 FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
 # Installazione dipendenze di sistema per i browser
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libglib2.0-0 \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libdbus-1-3 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
+    libglib2.0-0 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+    libdrm2 libdbus-1-3 libxkbcommon0 libxcomposite1 libxdamage1 \
+    libxrandr2 libgbm1 libasound2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia le dipendenze Python (inclusi i binari di pyscrappy-mcp) dallo stage builder
-COPY --from=builder /install /usr/local
+# 4. COPIA DELL'AMBIENTE ISOLATO
+# Copiamo l'intero venv creato nello stage builder. 
+# Questo include tutti i binari (come pyscrappy-mcp) e le librerie.
+COPY --from=builder /opt/venv /opt/venv
+
+# 5. ATTIVAZIONE AUTOMATICA
+# Aggiungendo il venv al PATH, il sistema userà sempre il python e i binari del venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copia il codice sorgente
 COPY . .
@@ -60,6 +60,5 @@ USER appuser
 
 EXPOSE 8000
 
-# --- IL COMANDO CHE MANCAVA ---
-# Questo avvia il server MCP e lo espone sulla rete
+# --- COMANDO FINALE (Con binding di rete corretto) ---
 CMD ["pyscrappy-mcp", "--http", "--host", "0.0.0.0"]
