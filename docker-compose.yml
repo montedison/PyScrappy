@@ -18,7 +18,7 @@ services:
   pyscrappy-mcp:
     build:
       context: .
-      dockerfile: Dockerfile.pyscrappy # Il Dockerfile che abbiamo ottimizzato prima
+      dockerfile: Dockerfile # Il Dockerfile che abbiamo ottimizzato prima
     container_name: pyscrappy_mcp
     restart: unless-stopped
     networks:
