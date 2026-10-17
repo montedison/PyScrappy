@@ -1,37 +1,25 @@
 services:
-  # --- IL CUORE: Motore AI ---
-  unsloth-backend:
-    image: unsloth-amd:latest # Assicurati che l'immagine sia disponibile localmente o su un registry
-    container_name: unsloth_rocm_backend
-    restart: unless-stopped
-    networks:
-      - dokploy-network
-    ports:
-      - "8888:8888"   # Jupyter
-      - "8005:8005"   # Unsloth Studio (Porta esterna)
-    volumes:
-      - unsloth_data:/workspace/work
-      - unsloth_studio_data:/workspace/studio
-      - ./custom_templates:/workspace/templates:ro
-
-  # --- IL MUSCOLO: Scraper MCP ---
+  # --- IL MUSCOLO: Scraper MCP (Sidecar) ---
   pyscrappy-mcp:
     build:
       context: .
-      dockerfile: Dockerfile # Il Dockerfile che abbiamo ottimizzato prima
+      dockerfile: Dockerfile
     container_name: pyscrappy_mcp
     restart: unless-stopped
     networks:
-      - dokploy-network
-    # Non servono porte esposte all'esterno perché comunicherà solo con Unsloth internamente
+      - dokploy-network # Si connette alla rete dove sta il backend
     environment:
       - PYTHONUNBUFFERED=1
       - PYSCRAPPY_MCP_CACHE_TTL=300
+    volumes:
+      - pyscrappy_data:/root/.cache/pyscrappy
 
 volumes:
-  unsloth_data:
-    name: unsloth_backend_data
-    external: true
-  unsloth_studio_data:
-    name: unsloth_studio_data
+  # Gestiamo solo il volume specifico del sidecar
+  pyscrappy_data:
+    name: pyscrappy_mcp_data
+
+networks:
+  # Dichiariamo che la rete esiste già (gestita da Dokploy)
+  dokploy-network:
     external: true
