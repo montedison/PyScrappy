@@ -18,6 +18,7 @@ volumes:
   # Gestiamo solo il volume specifico del sidecar
   pyscrappy_data:
     name: pyscrappy_mcp_data
+    external: true
 
 networks:
   # Dichiariamo che la rete esiste già (gestita da Dokploy)
