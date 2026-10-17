@@ -31,5 +31,7 @@ services:
 volumes:
   unsloth_data:
     name: unsloth_backend_data
+    external: true
   unsloth_studio_data:
     name: unsloth_studio_data
+    external: true
