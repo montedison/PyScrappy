@@ -52,5 +52,3 @@ RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
-
-CMD ["python", "main.py"]
