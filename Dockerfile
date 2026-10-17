@@ -45,7 +45,7 @@ COPY . .
 
 # --- INSTALLAZIONE BROWSER (Il passaggio mancante) ---
 # Installiamo solo Chromium per mantenere l'immagine leggera
-RUN playwright install chromium --with-deps
+RUN playwright install chromium
 
 # --- SECURITY ---
 RUN useradd -m appuser && chown -R appuser:appuser /app
