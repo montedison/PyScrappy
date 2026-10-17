@@ -15,6 +15,7 @@ services:
 volumes:
   pyscrappy_data:
     name: pyscrappy_mcp_data
+    external: true
 
 networks:
   unsloth-net:
