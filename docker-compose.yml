@@ -1,26 +1,21 @@
 services:
-  # --- IL MUSCOLO: Scraper MCP (Sidecar) ---
   pyscrappy-mcp:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: pyscrappy_mcp
-    restart: unless-stopped
-    networks:
-      - dokploy-network # Si connette alla rete dove sta il backend
+    restart: always  # Forza il riavvio se crasha
     environment:
       - PYTHONUNBUFFERED=1
-      - PYSCRAPPY_MCP_CACHE_TTL=300
+    networks:
+      - unsloth-net    # <--- CRUCIALE: Deve essere la stessa rete di Unsloth
     volumes:
       - pyscrappy_data:/root/.cache/pyscrappy
 
 volumes:
-  # Gestiamo solo il volume specifico del sidecar
   pyscrappy_data:
     name: pyscrappy_mcp_data
-    external: true
 
 networks:
-  # Dichiariamo che la rete esiste già (gestita da Dokploy)
-  dokploy-network:
+  unsloth-net:
     external: true
