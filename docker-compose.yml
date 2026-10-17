@@ -1,0 +1,47 @@
+services:
+  # --- SERVIZIO CORE: Motore AI ---
+  unsloth-rocm-backend:
+    image: unsloth-amd:latest
+    container_name: unsloth_rocm_backend
+    restart: unless-stopped
+    # ... (tutte le tue configurazioni hardware/GPU rimangono identiche)
+    ports:
+      - "8888:8888"   # Jupyter
+      - "8080:8080"   # API
+      - "8005:8000"   # Web UI
+      - "9000:9000"   # Opzionale: per accedere all'MCP anche dall'host (PC)
+    networks:
+      - unsloth-net
+    volumes:
+      # Cartella separata per i dati del backend (modelli, database, log)
+      - unsloth_data:/workspace/work
+      - unsloth_studio_data:/workspace/studio
+      - ./custom_templates:/workspace/templates:ro
+    # ... (altre config)
+
+  # --- SERVIZIO SIDECAR: Estensione MCP ---
+  pyscrappy-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.pyscrappy
+    container_name: pyscrappy_mcp
+    restart: unless-stopped
+    # Non usiamo più 'command' per installare, l'immagine è già pronta!
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYSCRAPPY_MCP_CACHE_TTL=300
+    networks:
+      - dokploy-network
+    volumes:
+      # Cartella separata per i dati dell'MCP (cache, scraping, etc.)
+      - pyscrappy_data:/root/.cache/pyscrappy
+
+volumes:
+  # Volume dedicato al backend
+  unsloth_data:
+    name: unsloth_backend_data
+  unsloth_studio_data:
+    name: unsloth_studio_data
+  # Volume dedicato esclusivamente al sidecar MCP
+  pyscrappy_data:
+    name: pyscrappy_mcp_data
