@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 1. Installiamo prima le dipendenze esterne
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
-
+RUN pip install --upgrade pip
 # 2. Copiamo il codice sorgente per poter installare il pacchetto locale
 COPY . .
 
@@ -62,4 +62,4 @@ EXPOSE 8000
 
 # --- IL COMANDO CHE MANCAVA ---
 # Questo avvia il server MCP e lo espone sulla rete
-CMD ["pyscrappy-mcp", "--http"]
+CMD ["pyscrappy-mcp", "--http", "--host", "0.0.0.0"]
