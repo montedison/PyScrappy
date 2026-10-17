@@ -23,7 +23,7 @@ services:
   pyscrappy-mcp:
     build:
       context: .
-      dockerfile: Dockerfile.pyscrappy
+      dockerfile: Dockerfile
     container_name: pyscrappy_mcp
     restart: unless-stopped
     # Non usiamo più 'command' per installare, l'immagine è già pronta!
