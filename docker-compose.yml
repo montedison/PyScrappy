@@ -23,13 +23,3 @@ volumes:
 networks:
   unsloth-net:
     external: true
-
-stealth-browser:
-    build:
-      context: ../stealth-browser-mcp # Path al repo dello specialista
-    container_name: stealth_browser_mcp
-    restart: always
-    environment:
-      - STEALTH_BROWSER_MCP_AUTH_TOKEN=${STEALTH_TOKEN}
-    networks:
-      - unsloth-net
