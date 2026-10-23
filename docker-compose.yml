@@ -6,11 +6,24 @@ services:
     container_name: pyscrappy_mcp
     restart: always  # Forza il riavvio se crasha
     environment:
+      - STEALTH_BROWSER_URL=http://stealth-browser:8000
+      - PYTHONPATH=/app/plugins/pyscrappy_stealth
       - PYTHONUNBUFFERED=1
     networks:
       - unsloth-net    # <--- CRUCIALE: Deve essere la stessa rete di Unsloth
     volumes:
       - pyscrappy_data:/root/.cache/pyscrappy
+      - ./plugins/pyscrappy_stealth:/app/plugins/pyscrappy_stealth
+      
+stealth-browser:
+    build:
+      context: ../stealth-browser-mcp # Path al repo dello specialista
+    container_name: stealth_browser_mcp
+    restart: always
+    environment:
+      - STEALTH_BROWSER_MCP_AUTH_TOKEN=${STEALTH_TOKEN}
+    networks:
+      - unsloth-net
 
 volumes:
   pyscrappy_data:
