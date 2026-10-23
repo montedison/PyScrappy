@@ -1,0 +1,15 @@
+[project]
+name = "pyscrappy-stealth-plugin"
+version = "0.1.0"
+description = "Proxy plugin to delegate anti-detection tasks to a remote stealth-browser-mcp service"
+dependencies = [
+    "httpx>=0.25.0",
+]
+
+# This is the magic line for PyScrappy discovery
+[project.entry-points."pyscrappy.scrapers"]
+stealth_browser = "pyscrappy_stealth.scraper:StealthBrowserScraper"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
