@@ -14,16 +14,6 @@ services:
     volumes:
       - pyscrappy_data:/root/.cache/pyscrappy
       - ./plugins/pyscrappy_stealth:/app/plugins/pyscrappy_stealth
-      
-stealth-browser:
-    build:
-      context: ../stealth-browser-mcp # Path al repo dello specialista
-    container_name: stealth_browser_mcp
-    restart: always
-    environment:
-      - STEALTH_BROWSER_MCP_AUTH_TOKEN=${STEALTH_TOKEN}
-    networks:
-      - unsloth-net
 
 volumes:
   pyscrappy_data:
@@ -33,3 +23,13 @@ volumes:
 networks:
   unsloth-net:
     external: true
+
+stealth-browser:
+    build:
+      context: ../stealth-browser-mcp # Path al repo dello specialista
+    container_name: stealth_browser_mcp
+    restart: always
+    environment:
+      - STEALTH_BROWSER_MCP_AUTH_TOKEN=${STEALTH_TOKEN}
+    networks:
+      - unsloth-net
